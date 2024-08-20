@@ -3,6 +3,7 @@ package com.example.fitwithme.application.service;
 import com.example.fitwithme.common.enums.ReservationStatus;
 import com.example.fitwithme.domain.model.Lesson;
 import com.example.fitwithme.domain.model.Reserve;
+import com.example.fitwithme.domain.model.Subscription;
 import com.example.fitwithme.infrastructure.dao.SubscriptionDao;
 import com.example.fitwithme.presentation.dto.request.LessonRequest;
 import com.example.fitwithme.presentation.dto.response.LessonResponse;
@@ -22,78 +23,9 @@ import java.util.List;
 public class SubscriptionService {
     private final SubscriptionDao subscriptionDao;
 
-    public List<Lesson> findLessons(String selectDate) {
-        String day = DateUtil.getDayByDate(selectDate);
+    public List<Subscription> findSubscription(Long centerId) {
+        List<Subscription> subscriptions = subscriptionDao.findSubscription(centerId);
 
-        return subscriptionDao.findAllLesson(selectDate, day);
-    }
-
-    public Lesson findLessonDetail(LessonRequest.detail request) {
-
-        Long lessonId = request.getLessonId();
-
-        Lesson lessonBase = subscriptionDao.findLessonById(lessonId);
-        int currentPersonnel = subscriptionDao.countCurrentPersonnel(request);
-
-        return Lesson.builder()
-                .lessonId(lessonBase.lessonId())
-                .center(lessonBase.center())
-                .lessonName(lessonBase.lessonName())
-                .instructorName(lessonBase.instructorName())
-                .currentPersonnel(currentPersonnel)
-                .personnel(lessonBase.personnel())
-                .lessonDay(lessonBase.lessonDay())
-                .startTime(lessonBase.startTime())
-                .endTime(lessonBase.endTime())
-                .build();
-    }
-
-    @Transactional
-    public LessonResponse.reserve reserve(LessonRequest.reserve request) {
-        Long reserveId = subscriptionDao.create(request);
-
-        LessonResponse.reserve response = LessonResponse.reserve.builder()
-                .reserveId(reserveId)
-                .status(reserveId > 0 ? ReservationStatus.SUCCESS : ReservationStatus.FAILURE)
-                .build();
-
-        return response;
-    }
-
-    @Transactional
-    public boolean cancel(int reserveId) {
-        int result = subscriptionDao.deleteReserve(reserveId);
-
-        if(result > 0){
-            return true;
-        }else {
-            return false;
-        }
-    }
-
-    public List<Reserve> findReserveLessons(LessonRequest.reserveList reserveList) {
-        List<Reserve> reserves = subscriptionDao.findAllReserveByUserIdAndDate(reserveList);
-        List<Reserve> completeReserves = new ArrayList<>();
-
-        for (Reserve reserve : reserves) {
-            Lesson lessonDetails = subscriptionDao.findLessonDetailsByLessonId(reserve.lessonId());
-
-            Reserve completeReserve = new Reserve(
-                    reserve.reserveId(),
-                    reserve.userId(),
-                    reserve.reserveDate(),
-                    reserve.lessonId(),
-                    lessonDetails.lessonName(),
-                    lessonDetails.instructorName(),
-                    reserve.currentPersonnel(),
-                    lessonDetails.personnel(),
-                    lessonDetails.lessonDay(),
-                    lessonDetails.startTime(),
-                    lessonDetails.endTime()
-            );
-            completeReserves.add(completeReserve);
-        }
-
-        return reserves;
+        return subscriptions;
     }
 }

@@ -5,6 +5,7 @@ import com.example.fitwithme.common.exception.BadRequestException;
 import com.example.fitwithme.common.exception.ErrorStatus;
 import com.example.fitwithme.domain.model.Lesson;
 import com.example.fitwithme.domain.model.Reserve;
+import com.example.fitwithme.domain.model.Subscription;
 import com.example.fitwithme.jwt.JwtUtil;
 import com.example.fitwithme.presentation.dto.request.LessonRequest;
 import com.example.fitwithme.presentation.dto.response.LessonResponse;
@@ -18,17 +19,18 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/subscription")
+@RequestMapping("/subscriptions")
 public class SubscriptionController {
 
     private final JwtUtil jwtUtil;
 
     private final SubscriptionService subscriptionService;
 
-    @GetMapping("/search/{selectDate}")
-    public ResponseEntity<List<Lesson>> findLessons(@PathVariable String selectDate, @RequestHeader("ACCESS_TOKEN") String accessToken) {
-        List<Lesson> lessonList = subscriptionService.findLessons(selectDate);
-        return ResponseEntity.ok(lessonList);
+    @GetMapping("/{centerId}")
+    public ResponseEntity<List<Subscription>> findSubscription(@PathVariable Long centerId) {
+
+        List<Subscription> subscriptionList = subscriptionService.findSubscription(centerId);
+        return ResponseEntity.ok(subscriptionList);
     }
 
     @GetMapping("/detail")
