@@ -33,40 +33,6 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionList);
     }
 
-    @GetMapping("/detail")
-    public ResponseEntity<Lesson> findLessonDetail(@RequestBody LessonRequest.detail request) {
-        Lesson lessonData = subscriptionService.findLessonDetail(request);
-        return ResponseEntity.ok(lessonData);
-    }
 
-    @PostMapping("/reserve")
-    public ResponseEntity<LessonResponse.reserve> reserve(@Valid @RequestBody LessonRequest.reserve request, @RequestHeader("ACCESS_TOKEN") String accessToken){
-        String userId = jwtUtil.getUserIdFromToken(accessToken);
-        request.setUserId(userId);
-
-        LessonResponse.reserve reserve = subscriptionService.reserve(request);
-        return ResponseEntity.ok(reserve);
-    }
-
-    @PutMapping("/cancel/{reserveId}")
-    public ResponseEntity<Integer> cancel(@PathVariable int reserveId){
-        boolean isCancelled = subscriptionService.cancel(reserveId);
-        if (isCancelled) {
-            return ResponseEntity.ok(reserveId);
-        } else {
-            throw new BadRequestException(ErrorStatus.CANCEL_FAIL);
-        }
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Reserve>> findReserveLessons(@RequestHeader("ACCESS_TOKEN") String accessToken) {
-        String today = DateUtil.getToday();
-        String userId = jwtUtil.getUserIdFromToken(accessToken);
-
-        LessonRequest.reserveList reserveList = new LessonRequest.reserveList(today, userId);
-
-        List<Reserve> lessonList = subscriptionService.findReserveLessons(reserveList);
-        return ResponseEntity.ok(lessonList);
-    }
 
 }
