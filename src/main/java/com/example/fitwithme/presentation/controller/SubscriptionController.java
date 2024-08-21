@@ -33,6 +33,4 @@ public class SubscriptionController {
         return ResponseEntity.ok(subscriptionList);
     }
 
-
-
 }
