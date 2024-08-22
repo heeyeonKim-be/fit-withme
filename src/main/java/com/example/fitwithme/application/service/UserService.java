@@ -60,20 +60,18 @@ public class UserService {
     @Transactional
     public String upload(String userId, MultipartFile image) {
         String profileImage = s3ImageService.upload(image);
-        userDao.uploadProfile(userId, profileImage);
+        String imageCaching = "https://d1mcc1dsha5zwq.cloudfront.net/"+profileImage.split("/")[profileImage.split("/").length-1];
+        userDao.uploadProfile(userId, profileImage, imageCaching);
 
         return userId;
     }
 
     @Transactional
     public String updateProfile(String userId, MultipartFile image) {
-        String imageUrl = userDao.findById(userId).imageUrl();
+        String imageUrl = userDao.findById(userId).imageUrlS3();
         s3ImageService.deleteImageFromS3(imageUrl);
 
-        String profileImage = s3ImageService.upload(image);
-        userDao.uploadProfile(userId, profileImage);
-
-        return userId;
+        return upload(userId, image);
     }
 
     @Transactional
@@ -96,7 +94,8 @@ public class UserService {
                 .userName(user.userName())
                 .email(user.email())
                 .phone(user.phone())
-                .imageUrl(user.imageUrl())
+                .imageUrlS3(user.imageUrlS3())
+                .imageUrlCloudfront(user.imageUrlCloudfront())
                 .build();
     }
 
