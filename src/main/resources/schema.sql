@@ -8,7 +8,8 @@ CREATE TABLE users (
     email   varchar(50)   NULL,
     phone   char(13)   NULL,
     leaved   bool   NULL,
-    image_url   varchar(200)   NULL,
+    image_url_s3   varchar(200)   NULL,
+    image_url_cloudFront   varchar(200)   NULL,
 
     PRIMARY KEY (id)
 );

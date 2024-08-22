@@ -40,8 +40,8 @@ public class UserDao {
         return userMapper.existsByUserId(userId);
     }
 
-    public void uploadProfile(String userId, String profileImage) {
-        userMapper.uploadProfile(userId, profileImage);
+    public void uploadProfile(String userId, String profileImage, String imageCaching) {
+        userMapper.uploadProfile(userId, profileImage, imageCaching);
     }
 
     public int deleteUser(String userId) {
