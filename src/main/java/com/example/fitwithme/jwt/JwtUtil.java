@@ -2,11 +2,14 @@ package com.example.fitwithme.jwt;
 
 import com.example.fitwithme.presentation.dto.response.UserResponse;
 import io.jsonwebtoken.*;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
@@ -19,9 +22,18 @@ public class JwtUtil {
     @Value("${jwt.refreshTokenValidity}")
     private long refreshTokenValidity;
 
+    @Getter
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public JwtUtil(RedisTemplate<String, String> redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
     public UserResponse.tokenInfo generateTokens(String userId) {
         String accessToken = createAccessToken(userId);
         String refreshToken = createRefreshToken(userId);
+
+        saveTokenToRedis(userId, accessToken, refreshToken);
 
         UserResponse.tokenInfo tokenInfo = UserResponse.tokenInfo.builder()
                 .grantType("Bearer")
@@ -64,7 +76,11 @@ public class JwtUtil {
         if (validateToken(refreshToken)) {
             Claims claims = getClaimsFromToken(refreshToken);
             String userId = claims.get("userId", String.class);
-            return createAccessToken(userId);
+
+            String redisRefreshToken = redisTemplate.opsForValue().get("REFRESH_TOKEN:" + userId);
+            if (redisRefreshToken != null && redisRefreshToken.equals(refreshToken)) {
+                return createAccessToken(userId);
+            }
         }
         return null;
     }
@@ -89,4 +105,10 @@ public class JwtUtil {
         Claims claims = getClaimsFromToken(token);
         return claims.get("userId", String.class);
     }
+
+    private void saveTokenToRedis(String userId, String accessToken, String refreshToken) {
+        redisTemplate.opsForValue().set("ACCESS_TOKEN:" + userId, accessToken, accessTokenValidity, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("REFRESH_TOKEN:" + userId, refreshToken, refreshTokenValidity, TimeUnit.MILLISECONDS);
+    }
+
 }

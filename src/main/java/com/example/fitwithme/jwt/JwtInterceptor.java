@@ -21,23 +21,23 @@ public class JwtInterceptor implements HandlerInterceptor {
         String accessToken = request.getHeader(TokenType.ACCESS_TOKEN.toString());
         String refreshToken = request.getHeader(TokenType.REFRESH_TOKEN.toString());
 
-        if (accessToken != null) {
-            if (jwtUtil.validateToken(accessToken)) {
+        if (accessToken != null && jwtUtil.validateToken(accessToken)) {
+            String userId = jwtUtil.getUserIdFromToken(accessToken);
+            String redisAccessToken = jwtUtil.getRedisTemplate().opsForValue().get("ACCESS_TOKEN:" + userId);
+            if (redisAccessToken != null && redisAccessToken.equals(accessToken)) {
                 return true;
             }
-        } else {
-            if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
-                String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
-                if (newAccessToken != null) {
-                    response.setHeader(TokenType.ACCESS_TOKEN.toString(), newAccessToken);
-                    return true;
-                }
+        }
+
+        if (refreshToken != null && jwtUtil.validateToken(refreshToken)) {
+            String newAccessToken = jwtUtil.refreshAccessToken(refreshToken);
+            if (newAccessToken != null) {
+                response.setHeader(TokenType.ACCESS_TOKEN.toString(), newAccessToken);
+                return true;
             }
         }
 
         response.setStatus(401);
-        response.setHeader(TokenType.ACCESS_TOKEN.toString(), accessToken);
-        response.setHeader(TokenType.REFRESH_TOKEN.toString(), refreshToken);
         return false;
     }
 

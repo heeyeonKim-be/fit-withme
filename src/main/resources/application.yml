@@ -8,12 +8,16 @@ spring:
     password: root
   profiles:
     include: private
+  data:
+    redis:
+      host: localhost
+      port: 6379
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
 jwt:
   secret: ${JWT_SECRET_KEY}
-  accessTokenValidity: 7200000
-  refreshTokenValidity: 86400000
+  accessTokenValidity: 43200000
+  refreshTokenValidity: 604800000
 
