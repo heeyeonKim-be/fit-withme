@@ -69,6 +69,25 @@ public class LessonService {
                 .build();
 
         return response;
+
+//        // 먼저 해당 수업 정보를 가져오면서 잠금을 겁니다.
+//        Lesson lesson = lessonDao.findByIdForUpdate(request.getLessonId());
+//
+//        // 수업의 최대 정원과 현재 예약된 인원수를 비교합니다.
+//        if (lesson.getCurrentCapacity() < lesson.getMaxCapacity()) {
+//            // 예약 가능하면 예약을 생성합니다.
+//            Long reserveId = lessonDao.create(request);
+//
+//            return LessonResponse.reserve.builder()
+//                    .reserveId(reserveId)
+//                    .status(ReservationStatus.SUCCESS)
+//                    .build();
+//        } else {
+//            // 예약 불가능하면 실패 응답을 반환합니다.
+//            return LessonResponse.reserve.builder()
+//                    .status(ReservationStatus.FAILURE)
+//                    .build();
+//        }
     }
 
     @Transactional
