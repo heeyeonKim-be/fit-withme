@@ -98,4 +98,16 @@
             L.LESSON_ID = #{lessonId}
     </select>
 
+    <select id="getReservationCountForUpdate" parameterType="map" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            RESERVE
+        WHERE
+            LESSON_ID = #{lessonId}
+            AND RESERVE_DATE = #{selectDate}
+            AND CANCELED = 0
+        FOR UPDATE
+    </select>
+
 </mapper>

@@ -61,33 +61,36 @@ public class LessonService {
 
     @Transactional
     public LessonResponse.reserve reserve(LessonRequest.reserve request) {
-        Long reserveId = lessonDao.create(request);
-
-        LessonResponse.reserve response = LessonResponse.reserve.builder()
-                .reserveId(reserveId)
-                .status(reserveId > 0 ? ReservationStatus.SUCCESS : ReservationStatus.FAILURE)
-                .build();
-
-        return response;
-
-//        // 먼저 해당 수업 정보를 가져오면서 잠금을 겁니다.
-//        Lesson lesson = lessonDao.findByIdForUpdate(request.getLessonId());
+//        Long reserveId = lessonDao.create(request);
 //
-//        // 수업의 최대 정원과 현재 예약된 인원수를 비교합니다.
-//        if (lesson.getCurrentCapacity() < lesson.getMaxCapacity()) {
-//            // 예약 가능하면 예약을 생성합니다.
-//            Long reserveId = lessonDao.create(request);
+//        LessonResponse.reserve response = LessonResponse.reserve.builder()
+//                .reserveId(reserveId)
+//                .status(reserveId > 0 ? ReservationStatus.SUCCESS : ReservationStatus.FAILURE)
+//                .build();
 //
-//            return LessonResponse.reserve.builder()
-//                    .reserveId(reserveId)
-//                    .status(ReservationStatus.SUCCESS)
-//                    .build();
-//        } else {
-//            // 예약 불가능하면 실패 응답을 반환합니다.
-//            return LessonResponse.reserve.builder()
-//                    .status(ReservationStatus.FAILURE)
-//                    .build();
-//        }
+//        return response;
+
+        // 1. 해당 수업에 대해 잠금을 걸고 현재 예약 인원 가져오기
+        int currentReservations = lessonDao.getReservationCountForUpdate(request.getLessonId(), request.getSelectDate());
+
+        // 2. 수업 정보 가져오기 (정원 확인)
+        Lesson lesson = lessonDao.findLessonById(request.getLessonId());
+
+        // 3. 정원 확인 후 예약 생성
+        if (currentReservations < lesson.personnel()) {
+            Long reserveId = lessonDao.create(request);
+
+            return LessonResponse.reserve.builder()
+                    .reserveId(reserveId)
+                    .status(ReservationStatus.SUCCESS)
+                    .build();
+        } else {
+            // 정원이 초과된 경우
+            return LessonResponse.reserve.builder()
+                    .status(ReservationStatus.OVER_CAPACITY)
+                    .build();
+        }
+
     }
 
     @Transactional
