@@ -71,4 +71,11 @@ public class LessonDao {
         }
     }
 
+    public int getReservationCountForUpdate(Long lessonId, String selectDate) {
+        try {
+            return lessonMapper.getReservationCountForUpdate(lessonId, selectDate);
+        } catch (EmptyResultDataAccessException e) {
+            throw new BadRequestException(ErrorStatus.NOT_FOUND_LESSON);
+        }
+    }
 }

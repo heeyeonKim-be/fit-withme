@@ -31,4 +31,5 @@ public interface LessonMapper {
 
     Lesson findLessonDetailsByLessonId(Long lessonId);
 
+    int getReservationCountForUpdate(Long lessonId, String selectDate);
 }
